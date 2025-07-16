@@ -1,0 +1,12 @@
+langchain
+langgraph
+langchain-openai
+pandas 
+numpy
+matplotlib
+seaborn
+prophet
+python-dotenv
+tavily-python
+fastapi
+uvicorn

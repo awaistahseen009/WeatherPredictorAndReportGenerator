@@ -1,0 +1,12 @@
+forecast:
+  horizon: 24 # Hours
+
+model:
+  freq: "H"
+  initial: '3600 hours'
+  period: '168 hours'
+  horizon: "12 hours"
+
+location:
+  city: "Islamabad"
+  country: "Pakistan"
