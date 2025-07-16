@@ -37,6 +37,9 @@ class WeatherState(TypedDict):
     report: Optional[dict]
     html_path: Optional[str]
     report_path: Optional[str]
+    city: str
+    country:str
 
 class CityRequest(BaseModel):
     city: str
+    country:str

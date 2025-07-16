@@ -26,7 +26,9 @@ app.add_middleware(
 async def predict(request:CityRequest):
     if not request.city:
         return JSONResponse(content = "Please enter a valid city", status_code = 400)
-    data = fetch_weather_data(request.city)
+    city = request.city
+    country = request.country
+    data = fetch_weather_data(city)
     if not data.empty:
         model = Prophet()
         print(data.head(), "Successfully retrieved the data")
@@ -39,7 +41,7 @@ async def predict(request:CityRequest):
 
         forecast_values = forecast[forecast['ds'] >= future['ds'].iloc[-FORECAST_H]]
 
-        result = run_langgraph_report(forecast_data = forecast_values)
+        result = run_langgraph_report(forecast_data = forecast_values, city = city , country = country )
         print(result['report'])
         print(type(result['report']))
         return JSONResponse(content = result['report'] , status_code = 200)
