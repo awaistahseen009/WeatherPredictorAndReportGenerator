@@ -9,7 +9,7 @@ config = load_config()
 FORECAST_H = config['forecast']['horizon']
 
 
-def pipeline(data):
+def pipeline(data, city , country):
         hourly = data.get("hourly", {})
         df = pd.DataFrame({
                 "timestamp": pd.to_datetime(hourly.get("time", [])),
@@ -29,7 +29,7 @@ def pipeline(data):
                 
                 forecast_values = forecast[forecast['ds'] >= future['ds'].iloc[-FORECAST_H]]
 
-                return run_langgraph_report(forecast_data = forecast_values)['report']
+                return run_langgraph_report(forecast_data = forecast_values, city = city , country = country)['report']
         else:
                 print("No dataframe loaded")
 
