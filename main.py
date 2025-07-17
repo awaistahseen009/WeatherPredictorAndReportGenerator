@@ -1,5 +1,9 @@
 import yaml
 from prophet.diagnostics import cross_validation
+import requests
+import sys
+import json
+from schemas.schema import PipelineData
 from workflows.worflows import run_langgraph_report
 from prophet import Prophet
 import pandas as pd
@@ -9,20 +13,31 @@ config = load_config()
 FORECAST_H = config['forecast']['horizon']
 
 
-def pipeline(data, city , country):
-        hourly = data.get("hourly", {})
+def pipeline(request:PipelineData):
+        data_params = request.data_params
+        params = data_params['params']
+        url = data_params['url']
+        geo_response = requests.get(url, params= params)
+        data = geo_response.json()
+        city = request.city
+        country = request.country
+        hourly = data['hourly']
+        # print(hourly)
+        # print(f"Data: {data}")
         df = pd.DataFrame({
-                "timestamp": pd.to_datetime(hourly.get("time", [])),
-                "temperature": hourly.get("temperature_2m", []),
-                "humidity": hourly.get("relative_humidity_2m", []),
-                "precipitation": hourly.get("precipitation", [])
+                "timestamp": pd.to_datetime(hourly["time"]),
+                "temperature": hourly["temperature_2m"],
+                "humidity": hourly["relative_humidity_2m"],
+                "precipitation": hourly["precipitation"]
             })
+        print(f"Head values: {df.head()}")
         if not df.empty:
+                df.head()
                 model = Prophet()
                 df = df.sort_values(by="timestamp").reset_index(drop=True)
-                data = data[['timestamp' , 'temperature']].copy()
-                data.columns = ['ds', 'y']
-                model.fit(data)
+                df = df[['timestamp' , 'temperature']].copy()
+                df.columns = ['ds', 'y']
+                model.fit(df)
                 future = model.make_future_dataframe(periods = 12, freq = 'H')
                 forecast = model.predict(future)
                 df_cv = cross_validation(model , initial = config['model']['initial'] , period = config['model']['period'] , horizon = config['model']['horizon'])
@@ -34,21 +49,12 @@ def pipeline(data, city , country):
                 print("No dataframe loaded")
 
 if __name__=="__main__":
-        model = Prophet()
-        data = fetch_weather_data(config['location']['city'])
-        if not data.empty:
-                print(data.head(), "Successfully retrieved the data")
-        else:
-                print("Failed to retrieve data.")
-        data = data[['timestamp' , 'temperature']].copy()
-        data.columns = ['ds', 'y']
-        model.fit(data)
-        future = model.make_future_dataframe(periods = 12, freq = 'H')
-        forecast = model.predict(future)
-        df_cv = cross_validation(model , initial = config['model']['initial'] , period = config['model']['period'] , horizon = config['model']['horizon'])
-
-        forecast_values = forecast[forecast['ds'] >= future['ds'].iloc[-FORECAST_H]]
-
-        print(run_langgraph_report(forecast_data = forecast_values)['report'])
-
+        input_json = json.loads(sys.argv[1])
+        request = PipelineData(
+        city=input_json['city'],
+        country=input_json['country'],
+        data_params=input_json['data_params']
+    )
+        result = pipeline(request)
+        print(json.dumps(result))
 
