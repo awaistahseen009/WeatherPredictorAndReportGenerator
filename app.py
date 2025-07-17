@@ -2,10 +2,11 @@ import yaml
 from prophet.diagnostics import cross_validation
 from workflows.worflows import run_langgraph_report
 from fastapi import FastAPI
+import requests
 import json
 from prophet import Prophet
 from fastapi.middleware.cors import CORSMiddleware
-from schemas.schema import CityRequest
+from schemas.schema import CityRequest, PipelineData
 from fastapi.responses import JSONResponse
 import pandas as pd
 from data_ingestion import fetch_weather_data
@@ -48,3 +49,39 @@ async def predict(request:CityRequest):
 
     else:
         return JSONResponse(content = "Failed to retrieve data.", status_code = 400)       
+
+@app.post("/pipeline")
+def pipeline(request:PipelineData):
+        data_params = request.data_params
+        params = data_params['params']
+        url = data_params['url']
+        geo_response = requests.get(url, params= params)
+        data = geo_response.json()
+        city = request.city
+        country = request.country
+        hourly = data['hourly']
+        # print(hourly)
+        # print(f"Data: {data}")
+        df = pd.DataFrame({
+                "timestamp": pd.to_datetime(hourly["time"]),
+                "temperature": hourly["temperature_2m"],
+                "humidity": hourly["relative_humidity_2m"],
+                "precipitation": hourly["precipitation"]
+            })
+        print(f"Head values: {df.head()}")
+        if not df.empty:
+                df.head()
+                model = Prophet()
+                df = df.sort_values(by="timestamp").reset_index(drop=True)
+                df = df[['timestamp' , 'temperature']].copy()
+                df.columns = ['ds', 'y']
+                model.fit(df)
+                future = model.make_future_dataframe(periods = 12, freq = 'H')
+                forecast = model.predict(future)
+                df_cv = cross_validation(model , initial = config['model']['initial'] , period = config['model']['period'] , horizon = config['model']['horizon'])
+                
+                forecast_values = forecast[forecast['ds'] >= future['ds'].iloc[-FORECAST_H]]
+
+                return run_langgraph_report(forecast_data = forecast_values, city = city , country = country)['report']
+        else:
+                print("No dataframe loaded")

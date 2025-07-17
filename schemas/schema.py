@@ -1,3 +1,4 @@
+import json
 from typing import TypedDict, Optional
 from pydantic import BaseModel, Field
 from typing import TypedDict, Optional, List, Dict
@@ -43,3 +44,8 @@ class WeatherState(TypedDict):
 class CityRequest(BaseModel):
     city: str
     country:str
+
+class PipelineData(BaseModel):
+    data_params: Dict
+    city: str
+    country: str
