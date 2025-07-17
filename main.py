@@ -49,12 +49,12 @@ def pipeline(request:PipelineData):
                 print("No dataframe loaded")
 
 if __name__=="__main__":
-        input_json = json.loads(sys.argv[1])
+        input_json = sys.argv[1]
         request = PipelineData(
         city=input_json['city'],
         country=input_json['country'],
         data_params=input_json['data_params']
     )
         result = pipeline(request)
-        print(json.dumps(result))
+        print(result)
 
