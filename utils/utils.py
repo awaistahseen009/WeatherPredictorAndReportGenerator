@@ -2,7 +2,9 @@ from datetime import datetime
 import json
 import os
 from schemas.schema import WeatherState
-
+from minio import Minio
+from minio.error import S3Error
+import io
 def get_weather_suitability(restaurant_name: str, restaurant_location: str, analysis: dict) -> str:
     """Determine why a restaurant is suitable based on weather conditions"""
     max_temp = analysis["max_temp"]
@@ -251,3 +253,33 @@ def generate_html(state: WeatherState, city , country ):
     new_state["html_path"] = html_path
     new_state["report_path"] = report_path
     return new_state
+
+def upload_to_minio(data, bucket_name, object_name):
+    # Initialize MinIO client
+    minio_client = Minio(
+        endpoint=os.getenv("MINIO_ENDPOINT", "minio:9000"),  # MinIO service hostname and port
+        access_key=os.getenv("MINIO_ACCESS_KEY"),
+        secret_key=os.getenv("MINIO_SECRET_KEY"),
+        secure=False  # Set to True if using HTTPS
+    )
+
+    try:
+        # Ensure bucket exists, create if it doesn't
+        if not minio_client.bucket_exists(bucket_name):
+            minio_client.make_bucket(bucket_name)
+
+        # Convert data to JSON string and upload to MinIO
+        data_bytes = json.dumps(data).encode('utf-8')
+        minio_client.put_object(
+            bucket_name,
+            object_name,
+            data=io.BytesIO(data_bytes),
+            length=len(data_bytes),
+            content_type='application/json'
+        )
+        print(f"Successfully uploaded {object_name} to MinIO bucket {bucket_name}")
+        # Return the full S3 path
+        return f"s3://{bucket_name}/{object_name}"
+    except S3Error as e:
+        print(f"Error uploading to MinIO: {e}")
+        raise

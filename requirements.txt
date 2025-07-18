@@ -10,3 +10,4 @@ python-dotenv
 tavily-python
 fastapi
 uvicorn
+minio
