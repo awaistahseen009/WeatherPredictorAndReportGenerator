@@ -60,12 +60,7 @@ def main(input_json):
 if __name__=="__main__":
     input_json = json.loads(sys.argv[1])
     result = main(input_json)
-
-    output_dir = "/tmp"
-    output_file = os.path.join(output_dir, "output.json")
-
-    # Ensure directory exists
-    os.makedirs(output_dir, exist_ok=True)
+    output_file = "/tmp/output.json"
 
     # Write result safely
     with open(output_file, "w") as f:
