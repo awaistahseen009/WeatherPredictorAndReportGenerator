@@ -47,15 +47,17 @@ def pipeline(request:PipelineData):
                 return run_langgraph_report(forecast_data = forecast_values, city = city , country = country)['report']
         else:
                 print("No dataframe loaded")
-
-if __name__=="__main__":
-        print(f"System args: {sys.argv[1]}")
-        input_json = json.loads(sys.argv[1])
+def main(input_json):
         request = PipelineData(
         city=input_json['city'],
         country=input_json['country'],
         data_params=input_json['data_params']
     )
         result = pipeline(request)
-        print(json.dumps(result))
+        return json.dumps(result)
+
+if __name__=="__main__":
+        print(f"System args: {sys.argv[1]}")
+        input_json = json.loads(sys.argv[1])
+        main(input_json)
 
