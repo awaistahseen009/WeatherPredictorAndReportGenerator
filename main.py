@@ -60,9 +60,6 @@ def main(input_json):
 if __name__=="__main__":
     input_json = json.loads(sys.argv[1])
     result = main(input_json)
-    output_file = "/tmp/output.json"
-
-    # Write result safely
-    with open(output_file, "w") as f:
-        f.write(result)
+    print("***PRINTING THE RESULTS***")
+    print(json.dumps(result))
 
