@@ -2,6 +2,7 @@ import yaml
 from prophet.diagnostics import cross_validation
 import requests
 import sys
+from datetime import datetime
 import os
 import json
 from schemas.schema import PipelineData
@@ -58,8 +59,13 @@ def main(input_json):
         return json.dumps(result)
 
 if __name__=="__main__":
+    file_storage_path = os.getenv("FILE_PATH", "")
+    if file_storage_path:
+           file_path = f"s3a://{file_storage_path}/{datetime.now()}.json"
     input_json = json.loads(sys.argv[1])
     result = main(input_json)
-    print("***PRINTING THE RESULTS***")
-    print(json.dumps(result))
+    with open(file_path, "w") as f:
+           f.write(result)
+#     print("***PRINTING THE RESULTS***")
+#     print(json.dumps(result))
 
