@@ -285,7 +285,7 @@ def upload_to_minio(data, bucket_name, object_name, data_type="html"):
             length=len(data_bytes),
             content_type=content_type
         )
-        print(f"Successfully uploaded {object_name} to MinIO bucket {bucket_name} as {content_type}")
+        # print(f"Successfully uploaded {object_name} to MinIO bucket {bucket_name} as {content_type}")
         return f"s3://{bucket_name}/{object_name}"
     except S3Error as e:
         print(f"Error uploading to MinIO: {e}")

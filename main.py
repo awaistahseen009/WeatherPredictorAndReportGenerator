@@ -32,7 +32,7 @@ def pipeline(request:PipelineData):
                 "humidity": hourly["relative_humidity_2m"],
                 "precipitation": hourly["precipitation"]
             })
-        print(f"Head values: {df.head()}")
+        # print(f"Head values: {df.head()}")
         if not df.empty:
                 df.head()
                 model = Prophet()
@@ -62,5 +62,5 @@ if __name__=="__main__":
     input_json = json.loads(sys.argv[1])
     result = main(input_json)
 #     print("***PRINTING THE RESULTS***")
-#     print(json.dumps(result))
+    print(json.dumps(result))
 

@@ -31,23 +31,23 @@ config = load_config()
 
 # Analyzing forecast data to extract key metrics and patterns
 def analyze_forecast(state: WeatherState) -> WeatherState:
-    print(state)
+    # print(state)
     df = state["forecast_data"]
     city = state["city"]  # Access from state
     country = state["country"]  # Access from state
     
     max_temp = df["yhat"].max()
-    print(f"Max temp: {max_temp}")
+    # print(f"Max temp: {max_temp}")
     min_temp = df["yhat"].min()
     max_time = df.loc[df["yhat"].idxmax(), "ds"].strftime("%I %p")
     min_time = df.loc[df["yhat"].idxmin(), "ds"].strftime("%I %p")
     
     temp_diff = df["yhat"].diff().abs()
-    print(f"Temp diff: {temp_diff.max()}")
+    # print(f"Temp diff: {temp_diff.max()}")
     notable_change = temp_diff.max()
-    print(f"Notable change: {notable_change}")
+    # print(f"Notable change: {notable_change}")
     change_time = df.loc[temp_diff.idxmax(), "ds"].strftime("%I %p") if notable_change > 2 else None
-    print(f"Change time: {change_time}")
+    # print(f"Change time: {change_time}")
     
     trend = "warming" if df["yhat"].iloc[-1] > df["yhat"].iloc[0] else "cooling" if df["yhat"].iloc[-1] < df["yhat"].iloc[0] else "stable"
     
@@ -111,7 +111,7 @@ def generate_plot(state: WeatherState) -> WeatherState:
     plot_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
     plt.close()
     
-    print(f"Generated plot data length: {len(plot_data)}")
+    # print(f"Generated plot data length: {len(plot_data)}")
     
     # Return the updated state
     new_state = dict(state)
@@ -302,7 +302,7 @@ def search_events_restaurants(state: WeatherState) -> WeatherState:
 
 # Generating detailed weather report using LLM
 def generate_report(state: WeatherState) -> WeatherState:
-    print("Generating the report")
+    # print("Generating the report")
     analysis = state["analysis"]
     historical_avg = state.get("historical_avg")
     event_info = state.get("event_info")
@@ -428,8 +428,8 @@ def generate_report(state: WeatherState) -> WeatherState:
                 except ValidationError as e:
                     logger.error(f"Fallback report validation failed: {e}")
     
-    print("Finished with the report")
-    print(report_dict)
+    # print("Finished with the report")
+    # print(report_dict)
     
     # Return the updated state
     new_state = dict(state)
@@ -446,10 +446,10 @@ def generate_html(state: WeatherState):
     city = state['city']
     country = state['country']
     date_str = datetime.now().strftime("%B %d, %Y")
-    print(f"Generating HTML with plot_data length: {len(plot_data) if plot_data else 0}")
-    print(f"City image available: {city_image is not None}")
-    print(f"Event image available: {event_image is not None}")
-    print(f"Restaurant image available: {restaurant_image is not None}")
+    # print(f"Generating HTML with plot_data length: {len(plot_data) if plot_data else 0}")
+    # print(f"City image available: {city_image is not None}")
+    # print(f"Event image available: {event_image is not None}")
+    # print(f"Restaurant image available: {restaurant_image is not None}")
     
     # Generate restaurant recommendations HTML
     restaurant_html = ""
@@ -632,7 +632,7 @@ def generate_html(state: WeatherState):
     # with open(html_path, "w", encoding="utf-8") as f:
     #     f.write(html_content)
     html_path = upload_to_minio(html_content , "weather-reports-html",file_name) 
-    print(f"Generated HTML report at: {html_path}")
+    # print(f"Generated HTML report at: {html_path}")
     
     # Save the report JSON to a file as well
     report_file_name = f"weather_report_data_{city.replace(' ', '_').lower()}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
@@ -640,7 +640,7 @@ def generate_html(state: WeatherState):
     # with open(report_path, "w", encoding="utf-8") as f:
     #     json.dump(report, f, indent=4)
     report_path = upload_to_minio(report , "weather-reports-json",report_file_name, "json")   
-    print(f"Successfully upload the JSON report at bucket")
+    # print(f"Successfully upload the JSON report at bucket")
     
     # Return the updated state
     new_state = dict(state)
@@ -690,4 +690,4 @@ if __name__ == "__main__":
 
     # Run the report
     html_path = run_langgraph_report(forecast_df, historical_avg=18.5)
-    print(f"\nFinal HTML report available at: {html_path}")
+    # print(f"\nFinal HTML report available at: {html_path}")
