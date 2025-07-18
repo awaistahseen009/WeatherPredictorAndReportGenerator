@@ -2,6 +2,7 @@ import yaml
 from prophet.diagnostics import cross_validation
 import requests
 import sys
+import os
 import json
 from schemas.schema import PipelineData
 from workflows.worflows import run_langgraph_report
@@ -57,7 +58,16 @@ def main(input_json):
         return json.dumps(result)
 
 if __name__=="__main__":
-        print(f"System args: {sys.argv[1]}")
-        input_json = json.loads(sys.argv[1])
-        main(input_json)
+    input_json = json.loads(sys.argv[1])
+    result = main(input_json)
+
+    output_dir = "/tmp"
+    output_file = os.path.join(output_dir, "output.json")
+
+    # Ensure directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Write result safely
+    with open(output_file, "w") as f:
+        f.write(result)
 
