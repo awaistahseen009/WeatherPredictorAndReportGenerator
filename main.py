@@ -59,13 +59,8 @@ def main(input_json):
         return json.dumps(result)
 
 if __name__=="__main__":
-    file_storage_path = os.getenv("FILE_PATH", "")
-    if file_storage_path:
-           file_path = f"s3a://{file_storage_path}/{datetime.now()}.json"
     input_json = json.loads(sys.argv[1])
     result = main(input_json)
-    with open(file_path, "w") as f:
-           f.write(result)
 #     print("***PRINTING THE RESULTS***")
 #     print(json.dumps(result))
 

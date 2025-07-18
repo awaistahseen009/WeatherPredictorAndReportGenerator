@@ -631,7 +631,7 @@ def generate_html(state: WeatherState):
     
     # with open(html_path, "w", encoding="utf-8") as f:
     #     f.write(html_content)
-    html_path = upload_to_minio(html_content , "weather_reports_html",file_name) 
+    html_path = upload_to_minio(html_content , "weather-reports-html",file_name) 
     print(f"Generated HTML report at: {html_path}")
     
     # Save the report JSON to a file as well
@@ -639,7 +639,7 @@ def generate_html(state: WeatherState):
     # report_path = os.path.join(output_dir, report_file_name)
     # with open(report_path, "w", encoding="utf-8") as f:
     #     json.dump(report, f, indent=4)
-    report_path = upload_to_minio(report , "weather_reports_json",report_file_name)   
+    report_path = upload_to_minio(report , "weather-reports-json",report_file_name)   
     print(f"Successfully upload the JSON report at bucket")
     
     # Return the updated state
