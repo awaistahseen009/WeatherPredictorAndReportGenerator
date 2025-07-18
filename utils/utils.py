@@ -254,13 +254,12 @@ def generate_html(state: WeatherState, city , country ):
     new_state["report_path"] = report_path
     return new_state
 
-def upload_to_minio(data, bucket_name, object_name):
-    # Initialize MinIO client
+def upload_to_minio(data, bucket_name, object_name, data_type="html"):
     minio_client = Minio(
-        endpoint=os.getenv("MINIO_ENDPOINT", "minio:9000"),  # MinIO service hostname and port
+        endpoint=os.getenv("MINIO_ENDPOINT", "minio:9000"),
         access_key=os.getenv("MINIO_ACCESS_KEY"),
         secret_key=os.getenv("MINIO_SECRET_KEY"),
-        secure=False  # Set to True if using HTTPS
+        secure=False
     )
 
     try:
@@ -268,17 +267,25 @@ def upload_to_minio(data, bucket_name, object_name):
         if not minio_client.bucket_exists(bucket_name):
             minio_client.make_bucket(bucket_name)
 
-        # Convert data to JSON string and upload to MinIO
-        data_bytes = json.dumps(data).encode('utf-8')
+        # Determine content type and prepare data
+        if data_type.lower() == "json" or isinstance(data, (dict, list)):
+            # Handle JSON data
+            data_bytes = json.dumps(data).encode('utf-8')
+            content_type = 'application/json'
+        else:
+            # Handle HTML or other string data
+            data_bytes = data.encode('utf-8') if isinstance(data, str) else data
+            content_type = 'text/html'
+
+        # Upload to MinIO
         minio_client.put_object(
             bucket_name,
             object_name,
             data=io.BytesIO(data_bytes),
             length=len(data_bytes),
-            content_type='application/json'
+            content_type=content_type
         )
-        print(f"Successfully uploaded {object_name} to MinIO bucket {bucket_name}")
-        # Return the full S3 path
+        print(f"Successfully uploaded {object_name} to MinIO bucket {bucket_name} as {content_type}")
         return f"s3://{bucket_name}/{object_name}"
     except S3Error as e:
         print(f"Error uploading to MinIO: {e}")
