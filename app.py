@@ -1,6 +1,6 @@
 import yaml
 from prophet.diagnostics import cross_validation
-from workflows.worflows import run_langgraph_report
+from workflows.worflows import run_langgraph_report_pipeline_only
 from fastapi import FastAPI
 import requests
 import json
@@ -42,7 +42,7 @@ async def predict(request:CityRequest):
 
         forecast_values = forecast[forecast['ds'] >= future['ds'].iloc[-FORECAST_H]]
 
-        result = run_langgraph_report(forecast_data = forecast_values, city = city , country = country )
+        result = run_langgraph_report_pipeline_only(forecast_data = forecast_values, city = city , country = country )
         print(result['report'])
         print(type(result['report']))
         return JSONResponse(content = result['report'] , status_code = 200)
@@ -82,6 +82,6 @@ def pipeline(request:PipelineData):
                 
                 forecast_values = forecast[forecast['ds'] >= future['ds'].iloc[-FORECAST_H]]
 
-                return run_langgraph_report(forecast_data = forecast_values, city = city , country = country)['report']
+                return run_langgraph_report_pipeline_only(forecast_data = forecast_values, city = city , country = country)['report']
         else:
                 print("No dataframe loaded")

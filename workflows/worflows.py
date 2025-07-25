@@ -669,9 +669,40 @@ def create_langgraph_workflow():
     # Compile the graph
     return workflow.compile()
 
+def create_langgraph_workflow_pipeline_only():
+    workflow = StateGraph(WeatherState)
+
+    # Add nodes to the workflow
+    workflow.add_node("analyze_forecast", analyze_forecast)  # Use the function directly
+    workflow.add_node("generate_plot", generate_plot)
+    workflow.add_node("search_events_restaurants", search_events_restaurants)
+    workflow.add_node("generate_report", generate_report)
+    # workflow.add_node("generate_html", generate_html)
+
+    # Set up the graph
+    workflow.set_entry_point("analyze_forecast")
+    workflow.add_edge("analyze_forecast", "generate_plot")
+    workflow.add_edge("generate_plot", "search_events_restaurants")
+    workflow.add_edge("search_events_restaurants", "generate_report")
+    # workflow.add_edge("generate_report", "generate_html")
+    workflow.add_edge("generate_report", END)
+
+    # Compile the graph
+    return workflow.compile()
+
 # Ensure run_langgraph_report initializes the state correctly
 def run_langgraph_report(forecast_data: pd.DataFrame, city: str, country: str, historical_avg: Optional[float] = None) -> str:
     workflow = create_langgraph_workflow()
+    result = workflow.invoke({
+        "forecast_data": forecast_data,
+        "historical_avg": historical_avg,
+        "city": city,
+        "country": country
+    })
+    return result
+
+def run_langgraph_report_pipeline_only(forecast_data: pd.DataFrame, city: str, country: str, historical_avg: Optional[float] = None) -> str:
+    workflow = create_langgraph_workflow_pipeline_only()
     result = workflow.invoke({
         "forecast_data": forecast_data,
         "historical_avg": historical_avg,
